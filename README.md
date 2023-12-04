@@ -2,7 +2,7 @@
 
 goal: build a simple multi-threaded static http web server. look into servers and thier architecture and problems (just a little) before you start doing this, and plan ahead a little.
 
-Since this is going to be in C/C++, first thing I need to figure out is how to build this thing, I can go raw, but I should consider CMake or makefile, I'll look into it.
+Since this is going to be in C/C++, first thing I need to figure out is how to build this thing (since building C/C++ is a pain in the ass), I can go raw, but I should consider CMake or makefile, I'll look into it.
 
 I also need to figure out the specific details of http, I need to figure out what NEEDS TO BE DONE.
 
