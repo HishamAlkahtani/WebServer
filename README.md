@@ -4,7 +4,7 @@ goal: build a simple multi-threaded static http web server. look into servers an
 
 Since this is going to be in C/C++, first thing I need to figure out is how to build this thing (since building C/C++ is a pain in the ass), I can go raw, but I should consider CMake or makefile, I'll look into it.
 
-I also need to figure out the specific details of http, I need to figure out what NEEDS TO BE DONE.
+I also need to figure out the specific details of the HTTP protocol, I need to figure out what NEEDS TO BE DONE. I also need to decide where I want to start, and how low-level I want this project to be, should I go all the way and implement at lowest level possible with only basic OS libraries and functionalities?
 
 Then after having a solid idea of what I need to do, I need to start defining subsystems and architecture, and splitting the program in parts, and defining responsibilites and concerns...
 
