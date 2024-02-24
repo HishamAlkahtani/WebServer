@@ -11,9 +11,15 @@ Then after having a solid idea of what I need to do, I need to start defining su
 then we start coding... god why did choose C this language is a pain in the ass
 
 features brain dump key words stuff:
+
 - multi-threaded
 - external config files
 - limitless request size ( until pc crashes )
 - Mostly C with a hint of C++ or any other technologies when needed.
 - static web resoureces
 - http protocol
+
+========
+For now I'm gonna do some prototyping for some basic functionalities to get the ball rolling.
+
+CURRENT GOAL: how does linux socket api work?
