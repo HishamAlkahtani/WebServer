@@ -2,7 +2,17 @@
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <string.h>
+#include <stdio.h>
+#include <netinet/in.h>
 
+
+void init_sockaddr(struct sockaddr_in *addr) {
+    memset(addr, 0, sizeof(struct sockaddr_in));
+    addr->sin_family = AF_INET;
+    addr->sin_port = htons(80);
+    addr->sin_addr.s_addr = INADDR_ANY; // vs INADDR_LOOPBACK? what is this
+}
 
 int main() {
     int socketfd = socket(AF_INET, SOCK_STREAM, 0);    
@@ -13,9 +23,37 @@ int main() {
         return 1;
     }
 
-    struct sockaddr *a;
-    printf("")
+
+    struct sockaddr_in addr;
+    init_sockaddr(&addr);
+    bind(socketfd, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));    
+    listen(socketfd, 1);
+
+    struct sockaddr_in peeraddr;
+    socklen_t peerlen = sizeof(struct sockaddr_in);
+    accept(socketfd, &peeraddr, &peerlen);  // why doesn't this accept stuff?
+
+    printf("Hel");
+    
+    
+    return 0;
 }
+
+
+/* call socket(), specify domain and type and protocol. AF_INET = internet domain.
+    SOCK_STREAM is the type, and 0 is the default protocol (tcp). (see man 7 ip)
+
+   socket() creates a socket in address space (look man socket), but no name is 
+   given to it for other processes to connect to it. we then use bind, to fully
+   initiate the socket, and specify the port and all the necessary info through
+   a the appropriate struct sockaddr... which is in our case struct sockaddr_in
+   where we give it the socket family (always AF_INET for some reason) and port
+   (in big endian, thus htons(80))
+
+    we also have to set sin_addr which is of type struct in_addr... and wtf is that?
+
+    
+*/
 
 
 /* 
