@@ -10,7 +10,7 @@
 void init_sockaddr(struct sockaddr_in *addr) {
     memset(addr, 0, sizeof(struct sockaddr_in));
     addr->sin_family = AF_INET;
-    addr->sin_port = htons(80);
+    addr->sin_port = htons(8080);
     addr->sin_addr.s_addr = INADDR_ANY; // vs INADDR_LOOPBACK? what is this
 }
 
@@ -23,19 +23,22 @@ int main() {
         return 1;
     }
 
-
     struct sockaddr_in addr;
     init_sockaddr(&addr);
-    bind(socketfd, (struct sockaddr*)&addr, sizeof(struct sockaddr_in));    
+    bind(socketfd, &addr, sizeof(struct sockaddr_in));    
     listen(socketfd, 1);
 
     struct sockaddr_in peeraddr;
     socklen_t peerlen = sizeof(struct sockaddr_in);
-    accept(socketfd, &peeraddr, &peerlen);  // why doesn't this accept stuff?
+    int connection_fd = accept(socketfd, &peeraddr, &peerlen);  // why doesn't this accept stuff?
 
-    printf("Hel");
-    
-    
+    char msg[2048];
+    memset(msg, 0, 2084 * sizeof(char));
+    msg[2047] = '\0';
+    recv(connection_fd, msg, 2047 * sizeof(char), 0);
+
+    printf("msg recievedd!!!:\n%s", msg);
+        
     return 0;
 }
 
@@ -68,4 +71,11 @@ the  send(2)  and  recv(2)  calls.  When a session has been completed a
 close(2) may be performed.  Out-of-band data may also be transmitted as
 described in send(2) and received as described in recv(2).
 
+    look up "file descriptor table", that might be interseting... what is it exactly?
+
+A file descriptor is an index in an array of pointers called file descriptor tables, these
+pointers point to files somewhere in memory. since we are on linux, which treats everything
+as a file, sockets are going to be just that, file descriptors that are an index to the same
+table as files, and they point to somewhere in memory where you can read/write, and the os 
+handles the rest
 */
