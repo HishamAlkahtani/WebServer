@@ -32,13 +32,12 @@ int main() {
     socklen_t peerlen = sizeof(struct sockaddr_in);
     int connection_fd = accept(socketfd, &peeraddr, &peerlen);  // why doesn't this accept stuff?
 
-    char msg[2048];
-    memset(msg, 0, 2084 * sizeof(char));
-    msg[2047] = '\0';
+    char* msg = calloc(2048, sizeof(char));
+    //memset(msg, 0, 2084 * sizeof(char));
+    //msg[2047] = '\0';
     recv(connection_fd, msg, 2047 * sizeof(char), 0);
+    printf("message recieved!\n%s", msg);
 
-    printf("msg recievedd!!!:\n%s", msg);
-        
     return 0;
 }
 
@@ -79,3 +78,5 @@ as a file, sockets are going to be just that, file descriptors that are an index
 table as files, and they point to somewhere in memory where you can read/write, and the os 
 handles the rest
 */
+
+// i think the bug because im gviovinmg stack buffer when it accepts heap[ buffer, it should be going the opposite way?] im using gdb and im more confused
