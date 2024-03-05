@@ -5,41 +5,26 @@
 #include <string.h>
 #include <stdio.h>
 #include <netinet/in.h>
-
-
-void init_sockaddr(struct sockaddr_in *addr) {
-    memset(addr, 0, sizeof(struct sockaddr_in));
-    addr->sin_family = AF_INET;
-    addr->sin_port = htons(8080);
-    addr->sin_addr.s_addr = INADDR_ANY; // vs INADDR_LOOPBACK? what is this
-}
+#include <iostream>
+#include "garbage.h"
 
 int main() {
-    int socketfd = socket(AF_INET, SOCK_STREAM, 0);    
-    printf("socket file descriptor: %d\n", socketfd);
-    
-    if (socketfd == -1) {
-        printf("Failed call to socket(), exiting");
-        return 1;
-    }
 
-    struct sockaddr_in addr;
-    init_sockaddr(&addr);
-    bind(socketfd, &addr, sizeof(struct sockaddr_in));    
-    listen(socketfd, 1);
+    ServerSocket socket(8080);
+  
+    InternetSocketAddress peer = socket.getConnection();
 
-    struct sockaddr_in peeraddr;
-    socklen_t peerlen = sizeof(struct sockaddr_in);
-    int connection_fd = accept(socketfd, &peeraddr, &peerlen);  // why doesn't this accept stuff?
+    char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
+    recv(peer.getConnectionFileDescriptor(), msg, 2047 * sizeof(char), 0);
 
-    char* msg = calloc(2048, sizeof(char));
-    //memset(msg, 0, 2084 * sizeof(char));
-    //msg[2047] = '\0';
-    recv(connection_fd, msg, 2047 * sizeof(char), 0);
-    printf("message recieved!\n%s", msg);
+    std::cout << "Message Recieved!\n";
+    std::cout << msg;
 
     return 0;
 }
+
+
+// i just changed the file name to cpp and now I'm in so many rabbit holes!
 
 
 /* call socket(), specify domain and type and protocol. AF_INET = internet domain.
