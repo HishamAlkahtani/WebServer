@@ -7,14 +7,14 @@
 #include <arpa/inet.h>
 #include <iostream>
 
-class InternetSocketAddress {
-    short sin_family;
-    unsigned short sin_port;
-    std::string ip;
-    int connection_fd;
+class InternetSocket {
+    short sin_family;        // AF_INET always
+    unsigned short sin_port; 
+    std::string ip;          
+    int connection_fd;       
 
     public:
-        InternetSocketAddress(sockaddr_in& addr, int fd) {
+        InternetSocket(sockaddr_in& addr, int fd) {
             sin_family = addr.sin_family;
             sin_port = addr.sin_port;
             ip = inet_ntoa(addr.sin_addr);
@@ -25,15 +25,15 @@ class InternetSocketAddress {
             return ip;
         }
 
-        int getConnectionFileDescriptor() {
-            return connection_fd;
+        /* Reads up to size bytes, returns number of 
+           bytes written to buffer */
+        int recieve(void* buffer, size_t size) {
+            return recv(connection_fd, buffer, size, 0);
         }
 };
 
 class ServerSocket {
-    
     int socket_fd;
-
 
     public:
         ServerSocket(int port) {
@@ -52,15 +52,13 @@ class ServerSocket {
 
             if (listen(socket_fd, 1) == -1)
                 throw std::runtime_error("call to listen failed");
-
-            std::cout << "socket created!\n";
         }
 
-        InternetSocketAddress getConnection() {
+        // TODO: Handle accept returning -1 (don't throw an exception!)
+        InternetSocket getConnection() {
             struct sockaddr_in peeraddr;
             socklen_t peerlen = sizeof(struct sockaddr_in);
-            int connection_fd = accept(socket_fd, (sockaddr*)&peeraddr, &peerlen);  \
-            std::cout << "Connection established!\n";
-            return InternetSocketAddress(peeraddr, connection_fd);
+            int connection_fd = accept(socket_fd, (sockaddr*)&peeraddr, &peerlen);
+            return InternetSocket(peeraddr, connection_fd);
         }
 };

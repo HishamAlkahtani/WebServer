@@ -13,13 +13,18 @@ then we start coding... god why did choose C this language is a pain in the ass
 features brain dump key words stuff:
 
 - multi-threaded
-- external config files
-- limitless request size ( until pc crashes )
+- caching?
+- external config files containing:
+- max-threads (thread pool queue)
+- max-heap-size (memory allocator + synchronization)
 - Mostly C with a hint of C++ or any other technologies when needed.
 - static web resoureces
 - http protocol
+- blacklist of ips
 
 ========
 For now I'm gonna do some prototyping for some basic functionalities to get the ball rolling.
 
-CURRENT GOAL: how does linux socket api work?
+how do parsers work?
+how many http headers do I need/should I support?
+It doesn't need to be perfect

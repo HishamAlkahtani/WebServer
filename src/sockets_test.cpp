@@ -9,17 +9,16 @@
 #include "garbage.h"
 
 int main() {
-
     ServerSocket socket(8080);
   
-    InternetSocketAddress peer = socket.getConnection();
+    InternetSocket peer = socket.getConnection();
 
     char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
-    recv(peer.getConnectionFileDescriptor(), msg, 2047 * sizeof(char), 0);
+    peer.recieve(msg, 2047 * sizeof(char));
 
     std::cout << "Message Recieved!\n";
     std::cout << msg;
-
+    std::cout << "\nConnection Ip: " << peer.getIp();
     return 0;
 }
 
