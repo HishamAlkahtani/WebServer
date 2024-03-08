@@ -1,10 +1,16 @@
+/* 
+    Thin C++ wrapper over C linux socket API
+*/
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdexcept>
 #include <netinet/in.h>
+#include <netinet/tcp.h>
 #include <arpa/inet.h>
+#include <unistd.h>
 #include <iostream>
 
 class InternetSocket {
@@ -21,6 +27,10 @@ class InternetSocket {
             connection_fd = fd;
         }
 
+        ~InternetSocket() {
+            close(connection_fd);
+        }
+
         std::string getIp() {
             return ip;
         }
@@ -29,6 +39,15 @@ class InternetSocket {
            bytes written to buffer */
         int recieve(void* buffer, size_t size) {
             return recv(connection_fd, buffer, size, 0);
+        }
+
+        size_t snd(void* buffer, size_t size) {
+            int flag = 1;
+            setsockopt(connection_fd, IPPROTO_TCP, TCP_NODELAY, (void*) &flag, sizeof(int));
+            size_t bytesSent = send(connection_fd, buffer, size, 0);
+            flag = 0;
+            setsockopt(connection_fd, IPPROTO_TCP, TCP_NODELAY, (void*) &flag, sizeof(int));
+            return bytesSent;
         }
 };
 
@@ -52,6 +71,10 @@ class ServerSocket {
 
             if (listen(socket_fd, 1) == -1)
                 throw std::runtime_error("call to listen failed");
+        }
+
+        ~ServerSocket() {
+            close(socket_fd);
         }
 
         // TODO: Handle accept returning -1 (don't throw an exception!)

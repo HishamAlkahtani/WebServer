@@ -21,6 +21,7 @@ features brain dump key words stuff:
 - static web resoureces
 - http protocol
 - blacklist of ips
+- cache size! (are large files cached?)
 
 ========
 For now I'm gonna do some prototyping for some basic functionalities to get the ball rolling.

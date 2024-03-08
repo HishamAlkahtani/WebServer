@@ -1,30 +1,43 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <string.h>
-#include <stdio.h>
-#include <netinet/in.h>
 #include <iostream>
-#include "garbage.h"
+#include "network.h"
 
 int main() {
     ServerSocket socket(8080);
-  
-    InternetSocket peer = socket.getConnection();
+    
+        InternetSocket peer = socket.getConnection();
+    for (int i = 0; i < 5; i++) {   
+        char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
+        peer.recieve(msg, 2047 * sizeof(char));
 
-    char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
-    peer.recieve(msg, 2047 * sizeof(char));
+        std::cout << "Message Recieved!\n";
+        std::cout << msg;
+        std::cout << "\nConnection Ip: " << peer.getIp();
 
-    std::cout << "Message Recieved!\n";
-    std::cout << msg;
-    std::cout << "\nConnection Ip: " << peer.getIp();
+        char* response = (char*) calloc(2048, sizeof(char));
+        strcpy(response, "HTTP/1.1 200 OK\r\n\r\n\
+        <HTML><BODY><H1>HELLO WORLD!</H1></BODY></HTML>");
+        std::cout << "bytes sent: " << peer.snd(response, 2048);
+
+    }
+
+    std::cout << "Program terminating!";
     return 0;
 }
 
 
-// i just changed the file name to cpp and now I'm in so many rabbit holes!
-
+/* big problem! program only sends buffers when closed! Do i just have to close the socket
+every time! this is ridiculous! for now a hacky fix is to close every socket after the response is send
+(InternetSocket destructor closes the socket, thus sending everything in its buffer).. but that would have
+horrible performance! As launching a new thread for just to make a single response will be annoying...
+or maybe the threads get passed sockets that they send one response over and then close them? but this means every
+request has to requeue! This is confusing. 
+two options: 1- every connection responds to one request only then close the socket.. but this is the 
+                old way of doing things! HTTP/0.9! I want this to be HTTP/1.1
+             2- somehow find a way to control (or force) when the data gets sent from the
+                os buffer of the socket... IDK how to do that. maybe TCP_NODELAY? or maybe
+                turnign TCP_NODELAY on and off to enforce a flush? 
+                
+*/
 
 /* call socket(), specify domain and type and protocol. AF_INET = internet domain.
     SOCK_STREAM is the type, and 0 is the default protocol (tcp). (see man 7 ip)
@@ -63,4 +76,3 @@ table as files, and they point to somewhere in memory where you can read/write, 
 handles the rest
 */
 
-// i think the bug because im gviovinmg stack buffer when it accepts heap[ buffer, it should be going the opposite way?] im using gdb and im more confused
