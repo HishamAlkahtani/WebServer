@@ -4,8 +4,8 @@
 int main() {
     ServerSocket socket(8080);
     
-        InternetSocket peer = socket.getConnection();
     for (int i = 0; i < 5; i++) {   
+        InternetSocket peer = socket.getConnection();
         char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
         peer.recieve(msg, 2047 * sizeof(char));
 
@@ -17,13 +17,17 @@ int main() {
         strcpy(response, "HTTP/1.1 200 OK\r\n\r\n\
         <HTML><BODY><H1>HELLO WORLD!</H1></BODY></HTML>");
         std::cout << "bytes sent: " << peer.snd(response, 2048);
-
     }
 
     std::cout << "Program terminating!";
     return 0;
 }
 
+/*  OK... another problem: SIGPIPE! how does your program know if the client closed the socket?
+    if client closes socket and you try to write to it: SIGPIPE, are you willing to let that go by?
+    because every session will be it's thread? so killing  a thread is fine?
+    maybe I'll have this be a HHTP/1.0 server?
+*/
 
 /* big problem! program only sends buffers when closed! Do i just have to close the socket
 every time! this is ridiculous! for now a hacky fix is to close every socket after the response is send
