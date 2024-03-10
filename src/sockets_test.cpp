@@ -3,7 +3,6 @@
 #include "network.h"
 
 
-
 int main() {
     ServerSocket socket(8080);
     InternetSocket peer = socket.getConnection();
