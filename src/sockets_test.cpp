@@ -1,31 +1,40 @@
 #include <iostream>
+#include <string>
 #include "network.h"
+
+
 
 int main() {
     ServerSocket socket(8080);
-    
-    for (int i = 0; i < 5; i++) {   
-        InternetSocket peer = socket.getConnection();
-        char* msg = static_cast<char*>(calloc(2048, sizeof(char)));
+    InternetSocket peer = socket.getConnection();
+    for (int i = 0; i <= 10; i++) { 
+        std::string responseBody = std::string("<HTML><BODY>Hello World! i : ") + std::to_string(i) + std::string("</BODY></HTML>");
+        std::string responseHeader = std::string("HTTP/1.1 200 OK\r\nContent-Length: ") + std::to_string(responseBody.length()) + std::string("\r\n\r\n");
+        std::string response = responseHeader + responseBody;
+        char* msg = (char*) calloc(2048, sizeof(char));
         peer.recieve(msg, 2047 * sizeof(char));
 
         std::cout << "Message Recieved!\n";
         std::cout << msg;
-        std::cout << "\nConnection Ip: " << peer.getIp();
 
-        char* response = (char*) calloc(2048, sizeof(char));
-        strcpy(response, "HTTP/1.1 200 OK\r\n\r\n\
-        <HTML><BODY><H1>HELLO WORLD!</H1></BODY></HTML>");
-        std::cout << "bytes sent: " << peer.snd(response, 2048);
+        size_t bytesSent = peer.snd((void*)response.c_str(), response.length()+1);
+        std::cout << "Message sent!\n";
+        std::cout << "Bytes sent: " << bytesSent << " bytes!\n";
     }
 
     std::cout << "Program terminating!";
     return 0;
 }
 
+/* 
+    A browser has two ways of knowing that the response from the server is complete,
+    either the server closes the tcp connection after completion, or the server specifies a 
+    Content-Length header.
+*/
+
 /*  OK... another problem: SIGPIPE! how does your program know if the client closed the socket?
     if client closes socket and you try to write to it: SIGPIPE, are you willing to let that go by?
-    because every session will be it's thread? so killing  a thread is fine?
+    because every session will be it's thread? so killing  a thread is fine? but this depends on thread pool implementation!
     maybe I'll have this be a HHTP/1.0 server?
 */
 

@@ -22,6 +22,7 @@ features brain dump key words stuff:
 - http protocol
 - blacklist of ips
 - cache size! (are large files cached?)
+- chunked transfer encoding? looks like a headache. (for Transfer-Encoding: Chunked header)
 
 ========
 For now I'm gonna do some prototyping for some basic functionalities to get the ball rolling.

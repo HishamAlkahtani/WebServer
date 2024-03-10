@@ -35,6 +35,10 @@ class InternetSocket {
             return ip;
         }
 
+        /* recieve and send are yucky! how to represent binary data in a C++y way?
+           or just leave it at that?
+        */
+
         /* Reads up to size bytes, returns number of 
            bytes written to buffer */
         int recieve(void* buffer, size_t size) {
@@ -42,11 +46,7 @@ class InternetSocket {
         }
 
         size_t snd(void* buffer, size_t size) {
-            int flag = 1;
-            setsockopt(connection_fd, IPPROTO_TCP, TCP_NODELAY, (void*) &flag, sizeof(int));
             size_t bytesSent = send(connection_fd, buffer, size, 0);
-            flag = 0;
-            setsockopt(connection_fd, IPPROTO_TCP, TCP_NODELAY, (void*) &flag, sizeof(int));
             return bytesSent;
         }
 };
@@ -67,7 +67,7 @@ class ServerSocket {
             addr.sin_addr.s_addr = INADDR_ANY; 
 
             if (bind(socket_fd, (sockaddr*)&addr, sizeof(struct sockaddr_in)) == -1)
-                throw std::runtime_error("call to bind failed");
+                throw std::runtime_error("Failed to bind socket to port!");
 
             if (listen(socket_fd, 1) == -1)
                 throw std::runtime_error("call to listen failed");
