@@ -1,11 +1,11 @@
 #include <iostream>
 #include <string>
-#include "network.h"
+#include "http.h"
 
 
 int main() {
     ServerSocket socket(8080);
-    InternetSocket peer = socket.getConnection();
+    InternetHttpSocket peer = socket.getConnection();
     for (int i = 0; i <= 10; i++) { 
         std::string responseBody = std::string("<HTML><BODY>Hello World! i : ") + std::to_string(i) + std::string("</BODY></HTML>");
         std::string responseHeader = std::string("HTTP/1.1 200 OK\r\nContent-Length: ") + std::to_string(responseBody.length()) + std::string("\r\n\r\n");
@@ -39,7 +39,7 @@ int main() {
 
 /* big problem! program only sends buffers when closed! Do i just have to close the socket
 every time! this is ridiculous! for now a hacky fix is to close every socket after the response is send
-(InternetSocket destructor closes the socket, thus sending everything in its buffer).. but that would have
+(InternetHttpSocket destructor closes the socket, thus sending everything in its buffer).. but that would have
 horrible performance! As launching a new thread for just to make a single response will be annoying...
 or maybe the threads get passed sockets that they send one response over and then close them? but this means every
 request has to requeue! This is confusing. 
