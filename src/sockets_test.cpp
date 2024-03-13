@@ -7,16 +7,13 @@ int main() {
     ServerSocket socket(8080);
     InternetHttpSocket peer = socket.getConnection();
     for (int i = 0; i <= 10; i++) { 
-        std::string responseBody = std::string("<HTML><BODY>Hello World! i : ") + std::to_string(i) + std::string("</BODY></HTML>");
-        std::string responseHeader = std::string("HTTP/1.1 200 OK\r\nContent-Length: ") + std::to_string(responseBody.length()) + std::string("\r\n\r\n");
-        std::string response = responseHeader + responseBody;
-        char* msg = (char*) calloc(2048, sizeof(char));
-        peer.recieve(msg, 2047 * sizeof(char));
+        HttpRequest request = peer.recieve();
 
         std::cout << "Message Recieved!\n";
-        std::cout << msg;
+        std::cout << request.getRawRequest();
 
-        size_t bytesSent = peer.snd((void*)response.c_str(), response.length()+1);
+        HttpResponse response(200, "OK", "Hello World!");
+        size_t bytesSent = peer.snd(response);
         std::cout << "Message sent!\n";
         std::cout << "Bytes sent: " << bytesSent << " bytes!\n";
     }

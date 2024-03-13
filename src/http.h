@@ -8,6 +8,11 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <iostream>
+#include <memory>
+#include <vector>
+#include <cstring>
+
+#define CRLF std::string("\r\n")
 
 enum HttpMethod {
     GET, POST, PUT, DELETE
@@ -15,21 +20,53 @@ enum HttpMethod {
 
 class HttpRequest {
     enum HttpMethod method;
+    std::string uri;
+    char* rawRequest; // temporary!!
 
     public:
         HttpRequest(char* request) {
+            // TODO: Parse HTTP.
+            rawRequest = new char[2048];
+            std::memcpy(rawRequest, request, 2048);
+        }
 
+        char* getRawRequest() { // delete later!
+            return rawRequest;
+        }
+
+        ~HttpRequest() {
+            delete[] rawRequest;
         }
 };
 
 class HttpResponse {
     int responseCode;
     std::string responseMessage;
+    std::string body;
+    std::vector<std::string>  headers;
 
     public:
+        HttpResponse(int responseCode, std::string responseMessage, std::string body) 
+        : responseCode(responseCode), responseMessage(responseMessage), body(body)
+        { }
+        
+        const char* getData(size_t& size) {
+            std::string header; 
+            header += "HTTP/1.1 " + std::to_string(responseCode) + " " + responseMessage + CRLF;
+            header += "Content-Length: " + std::to_string(body.length()) + CRLF;
+            // TODO: add remaining headers from vector
+            header += CRLF;
+            std::cout << "HEader! \n" << header << std::endl;
+            std::string message = header + body;
+            size = message.length();
+            std::cout << "Sending message: \n" << message;
+            const char* r = message.c_str();
+            printf("PFR ! \n%s\n", r);
+            return r;
+        }
 
-        char* getData(size_t& size) {
-            
+        void addResponseHeader(std::string key, std::string value) {
+            // TODO: add to vector
         }
 };
 
@@ -58,14 +95,14 @@ class InternetHttpSocket {
         HttpRequest recieve() {
             char* buffer = new char[2048];
             recv(connection_fd, (void*) buffer, 2048, 0);
-            HttpRequest request(buffer);
+            HttpRequest request(buffer); // change to unique pointer? oh this is starting to get messy
             delete[] buffer;
             return request;
         }
 
         size_t snd(HttpResponse& response) {
             size_t size;
-            char* data = response.getData(size);
+            const char* data = response.getData(size);
             return send(connection_fd, (void*) data, size, 0);
         }
 };
