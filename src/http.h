@@ -50,19 +50,16 @@ class HttpResponse {
         : responseCode(responseCode), responseMessage(responseMessage), body(body)
         { }
         
-        const char* getData(size_t& size) {
+
+
+        std::string getData() {
             std::string header; 
-            header += "HTTP/1.1 " + std::to_string(responseCode) + " " + responseMessage + CRLF;
+            header += std::string("HTTP/1.1 ") + std::to_string(responseCode) + " " + responseMessage + CRLF;
             header += "Content-Length: " + std::to_string(body.length()) + CRLF;
             // TODO: add remaining headers from vector
             header += CRLF;
-            std::cout << "HEader! \n" << header << std::endl;
             std::string message = header + body;
-            size = message.length();
-            std::cout << "Sending message: \n" << message;
-            const char* r = message.c_str();
-            printf("PFR ! \n%s\n", r);
-            return r;
+            return message;
         }
 
         void addResponseHeader(std::string key, std::string value) {
@@ -71,6 +68,10 @@ class HttpResponse {
 };
 
 class InternetHttpSocket {
+    // what about connection: keep-alive
+    // should it be checked and implementation should differ if it's not requestseed?
+    // or should it be assumed that we will always keep-alive, does it make a difference
+    // implementation wise? the client can close the connection if it wants idont carde
     short sin_family;        // AF_INET always
     unsigned short sin_port; 
     std::string ip;          
@@ -101,9 +102,8 @@ class InternetHttpSocket {
         }
 
         size_t snd(HttpResponse& response) {
-            size_t size;
-            const char* data = response.getData(size);
-            return send(connection_fd, (void*) data, size, 0);
+            std::string message = response.getData();
+            return send(connection_fd, message.c_str(), message.length() * sizeof(char), 0);
         }
 };
 
