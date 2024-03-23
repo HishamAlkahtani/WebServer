@@ -27,6 +27,6 @@ features brain dump key words stuff:
 ========
 For now I'm gonna do some prototyping for some basic functionalities to get the ball rolling.
 
-how do parsers work?
-how many http headers do I need/should I support?
-It doesn't need to be perfect
+make a file browser-esque thing startign at index.html! ... index.html gives you a list of all available files and directories, and if the URL points to a directory, then the a wepbage with a list of files is returned to the user.... kinda like vscode live server and apache.
+
+Now what to do with pathnames? just pass whatever is in the request to fopen? some checks? or full conversion and manual lookup for the file? what about access control?
