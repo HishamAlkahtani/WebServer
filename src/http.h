@@ -1,6 +1,5 @@
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <string.h>
 #include <stdio.h>
 #include <stdexcept>
 #include <netinet/in.h>
@@ -18,24 +17,40 @@ enum HttpMethod {
     GET, POST, PUT, DELETE
 };
 
+std::vector<std::string> splitHeaderLines(std::string request) {
+    // include the body in the vector? the body is always the last index? 
+    // but it would just be confusing, what if someone posts without a body?
+    // this is probably broken, double check later.
+    std::vector<std::string> result;
+    size_t startOfLine = 0; // points to first char in line
+    while (request.size()) {
+        std::size_t endOfLine = request.find("\r\n", startOfLine); // points to \r
+        std::size_t length = endOfLine - startOfLine;
+        if (length > 0)
+            result.push_back(request.substr(startOfLine, length));
+        else
+            break;
+        startOfLine = endOfLine+2;
+    }
+    return result;
+}
+
+// only uri is parsed currently...
 class HttpRequest {
     enum HttpMethod method;
     std::string uri;
-    char* rawRequest; // temporary!!
+    std::string rawRequest;
 
     public:
         HttpRequest(char* request) {
-            // TODO: Parse HTTP.
-            rawRequest = new char[2048];
-            std::memcpy(rawRequest, request, 2048);
+            rawRequest = std::string(request);
+            for (std::string i : splitHeaderLines(rawRequest)) {
+                std::cout << i << " and another line: " << std::endl; // looks good
+            }
         }
 
-        char* getRawRequest() { // delete later!
+        std::string getRawRequest() { // delete later!
             return rawRequest;
-        }
-
-        ~HttpRequest() {
-            delete[] rawRequest;
         }
 };
 
@@ -49,8 +64,6 @@ class HttpResponse {
         HttpResponse(int responseCode, std::string responseMessage, std::string body) 
         : responseCode(responseCode), responseMessage(responseMessage), body(body)
         { }
-        
-
 
         std::string getData() {
             std::string header; 

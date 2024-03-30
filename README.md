@@ -16,7 +16,9 @@ features brain dump key words stuff:
 - caching?
 - external config files containing:
 - max-threads (thread pool queue)
-- max-heap-size (memory allocator + synchronization)
+- cache max file size
+- cache max # of files
+- the cache part of the system holds all pointers!
 - Mostly C with a hint of C++ or any other technologies when needed.
 - static web resoureces
 - http protocol
@@ -30,3 +32,5 @@ For now I'm gonna do some prototyping for some basic functionalities to get the 
 make a file browser-esque thing startign at index.html! ... index.html gives you a list of all available files and directories, and if the URL points to a directory, then the a wepbage with a list of files is returned to the user.... kinda like vscode live server and apache.
 
 Now what to do with pathnames? just pass whatever is in the request to fopen? some checks? or full conversion and manual lookup for the file? what about access control?
+
+what to do about synchronization when it comes to cache?
