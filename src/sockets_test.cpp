@@ -2,6 +2,11 @@
 #include <string>
 #include "http.h"
 
+/*
+// find file and put it in a response (resolves request and creates response)
+HttpResponse& responseCreator(std::string file_path) {
+// I'm sorry, how do references work again?
+} */
 
 int main() {
     ServerSocket socket(8080);
@@ -9,8 +14,8 @@ int main() {
     for (int i = 0; i <= 10; i++) { 
         HttpRequest request = peer.recieve();
 
-        std::cout << "Message Recieved!\n";
-        std::cout << request.getRawRequest();
+        std::cout << " user wants path: " << request.getUri();
+        std::cout << "\nMessage Recieved!\n";
 
         HttpResponse response(200, "OK", "Hello World!");
         size_t bytesSent = peer.snd(response);

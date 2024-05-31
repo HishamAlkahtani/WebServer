@@ -34,3 +34,5 @@ make a file browser-esque thing startign at index.html! ... index.html gives you
 Now what to do with pathnames? just pass whatever is in the request to fopen? some checks? or full conversion and manual lookup for the file? what about access control?
 
 what to do about synchronization when it comes to cache?
+
+https://stackoverflow.com/questions/984357/path-sanitization-in-c

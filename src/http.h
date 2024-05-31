@@ -13,44 +13,52 @@
 
 #define CRLF std::string("\r\n")
 
-enum HttpMethod {
-    GET, POST, PUT, DELETE
-};
-
-std::vector<std::string> splitHeaderLines(std::string request) {
-    // include the body in the vector? the body is always the last index? 
-    // but it would just be confusing, what if someone posts without a body?
-    // this is probably broken, double check later.
+std::vector<std::string> split(std::string str, std::string delimiter) {
     std::vector<std::string> result;
     size_t startOfLine = 0; // points to first char in line
-    while (request.size()) {
-        std::size_t endOfLine = request.find("\r\n", startOfLine); // points to \r
+    while (startOfLine < str.size()) {
+        std::size_t endOfLine = str.find(delimiter, startOfLine); // points to \r
         std::size_t length = endOfLine - startOfLine;
-        if (length > 0)
-            result.push_back(request.substr(startOfLine, length));
-        else
-            break;
-        startOfLine = endOfLine+2;
+        
+        result.push_back(str.substr(startOfLine, length));
+
+        startOfLine = endOfLine+delimiter.length();
     }
     return result;
 }
 
 // only uri is parsed currently...
+// what headers to support?
 class HttpRequest {
-    enum HttpMethod method;
+    std::string method;
     std::string uri;
     std::string rawRequest;
 
     public:
         HttpRequest(char* request) {
             rawRequest = std::string(request);
-            for (std::string i : splitHeaderLines(rawRequest)) {
-                std::cout << i << " and another line: " << std::endl; // looks good
-            }
+            std::vector<std::string> headerLines = split(rawRequest, CRLF);
+            std::vector<std::string> firstLine = split(headerLines[0], " ");
+            
+            if (firstLine.size() != 3); // 400 bad request! what to do? throw smth to be caught another place? I guess so , better than creating a bad object
+
+            if (firstLine[0] != std::string("GET")
+             && firstLine[0] != std::string("POST")
+             && firstLine[0] != std::string("DELETE"))
+             ; // 400 BAD REQUEST ALSO
+            else
+                method = firstLine[0];
+
+            uri = firstLine[1]; // apply path sanitization later!
+            // discard firstLine[3];        
         }
 
         std::string getRawRequest() { // delete later!
             return rawRequest;
+        }
+
+        std::string getUri() {
+            return uri;
         }
 };
 
