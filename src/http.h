@@ -15,13 +15,19 @@
 
 std::vector<std::string> split(std::string str, std::string delimiter) {
     std::vector<std::string> result;
-    size_t startOfLine = 0; // points to first char in line
+    size_t startOfLine = 0;
     while (startOfLine < str.size()) {
-        std::size_t endOfLine = str.find(delimiter, startOfLine); // points to \r
+        std::size_t nextOccurrence = str.find(delimiter, startOfLine);
+        
+        std::size_t endOfLine;    
+        if (nextOccurrence != std::string::npos)
+            endOfLine = nextOccurrence;
+        else
+            endOfLine = str.size();
+            
         std::size_t length = endOfLine - startOfLine;
         
         result.push_back(str.substr(startOfLine, length));
-
         startOfLine = endOfLine+delimiter.length();
     }
     return result;
@@ -39,18 +45,16 @@ class HttpRequest {
             rawRequest = std::string(request);
             std::vector<std::string> headerLines = split(rawRequest, CRLF);
             std::vector<std::string> firstLine = split(headerLines[0], " ");
-            
             if (firstLine.size() != 3); // 400 bad request! what to do? throw smth to be caught another place? I guess so , better than creating a bad object
 
             if (firstLine[0] != std::string("GET")
              && firstLine[0] != std::string("POST")
              && firstLine[0] != std::string("DELETE"))
              ; // 400 BAD REQUEST ALSO
-            else
+            else 
                 method = firstLine[0];
 
-            uri = firstLine[1]; // apply path sanitization later!
-            // discard firstLine[3];        
+            uri = firstLine[1]; // apply path sanitization later! (NOT HERE!)
         }
 
         std::string getRawRequest() { // delete later!
