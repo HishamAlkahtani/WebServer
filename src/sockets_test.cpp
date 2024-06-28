@@ -1,12 +1,26 @@
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <ostream>
 #include "http.h"
 
-/*
+
+
 // find file and put it in a response (resolves request and creates response)
-HttpResponse& responseCreator(std::string file_path) {
-// I'm sorry, how do references work again?
-} */
+HttpResponse& responseCreator(HttpRequest request) {
+    //               careful cno path escaping/ protection, fix later
+    std::ifstream fl(request.getUri(), std::ifstream::binary);
+    if (fl.fail()) {
+        HttpResponse &ret = *new HttpResponse(404, "NOT FOUND", "File Not Found");
+        return ret;
+    }
+    char data[1024];
+    fl.read(data, 1024);
+    std::string dstring(data, fl.gcount());
+    HttpResponse &response = *new HttpResponse(400, "OK", dstring); // <- mem leak I know
+    return response;
+
+} 
 
 int main() {
     ServerSocket socket(8080);
@@ -17,10 +31,7 @@ int main() {
         std::cout << " user wants path: " << request.getUri();
         std::cout << "\nMessage Recieved!\n";
 
-        HttpResponse response(200, "OK", "Hello World!");
-        size_t bytesSent = peer.snd(response);
-        std::cout << "Message sent!\n";
-        std::cout << "Bytes sent: " << bytesSent << " bytes!\n";
+        peer.snd(responseCreator(request));
     }
 
     std::cout << "Program terminating!";

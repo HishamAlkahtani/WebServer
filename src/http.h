@@ -68,7 +68,7 @@ class HttpRequest {
 
 class HttpResponse {
     int responseCode;
-    std::string responseMessage;
+    std::string responseMessage; // << this also holds binary data, is that ok?
     std::string body;
     std::vector<std::string>  headers;
 
