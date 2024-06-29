@@ -2,36 +2,64 @@
 #include <string>
 #include <fstream>
 #include <ostream>
+#include <unistd.h>
+#include <stdlib.h>
+#include <filesystem>
 #include "http.h"
 
+std::string workingDirectory;
 
+// check if file is under server root
+// returns false if file exists and is out of boudns, false otherwise
+bool safe_path(std::string path) {
+    char* rp = realpath(path.c_str(), NULL);
+    if (!rp)
+        return true; 
+    std::string realPath(rp);
+    free(rp);
+    std::cout << "User wants realpath: " << realPath << std::endl;
+    return true;
+}
 
 // find file and put it in a response (resolves request and creates response)
-HttpResponse& responseCreator(HttpRequest request) {
-    //               careful cno path escaping/ protection, fix later
-    std::ifstream fl(request.getUri(), std::ifstream::binary);
-    if (fl.fail()) {
+HttpResponse& createResponse(HttpRequest request) {
+    std::string requestPath = request.getRequestedPath();
+    if (!safe_path(requestPath)) {
+        HttpResponse &ret = *new HttpResponse(401, "UNAUTHORIZED", "You can't go there");
+        return ret;
+    }
+    if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath)) {
         HttpResponse &ret = *new HttpResponse(404, "NOT FOUND", "File Not Found");
         return ret;
     }
+    std::ifstream fl(request.getRequestedPath(), std::ifstream::binary);
     char data[1024];
     fl.read(data, 1024);
     std::string dstring(data, fl.gcount());
-    HttpResponse &response = *new HttpResponse(400, "OK", dstring); // <- mem leak I know
+    HttpResponse& response = *new HttpResponse(200, "OK", dstring); // <- mem leak I know
     return response;
 
 } 
 
+void initWorkingDirectory() {
+    char buff[4095];
+    memset(buff, 0, sizeof(char) * 4095);
+    getcwd(buff, sizeof(char) * 4095);
+    workingDirectory = buff;
+}
+
 int main() {
+    initWorkingDirectory();
+    std::cout << "Server started from with root directory: " << workingDirectory << std::endl;
     ServerSocket socket(8080);
     InternetHttpSocket peer = socket.getConnection();
     for (int i = 0; i <= 10; i++) { 
         HttpRequest request = peer.recieve();
 
-        std::cout << " user wants path: " << request.getUri();
         std::cout << "\nMessage Recieved!\n";
+        std::cout << " user wants path: " << request.getRequestedPath();
 
-        peer.snd(responseCreator(request));
+        peer.snd(createResponse(request));
     }
 
     std::cout << "Program terminating!";

@@ -32,12 +32,11 @@ std::vector<std::string> split(std::string str, std::string delimiter) {
     }
     return result;
 }
-
-// only uri is parsed currently...
+// where to put 400 bad request..
 // what headers to support?
 class HttpRequest {
     std::string method;
-    std::string uri;
+    std::string path;
     std::string rawRequest;
 
     public:
@@ -54,15 +53,15 @@ class HttpRequest {
             else 
                 method = firstLine[0];
 
-            uri = firstLine[1]; // apply path sanitization later! (NOT HERE!)
+            path = std::string(".") + firstLine[1]; 
         }
 
         std::string getRawRequest() { // delete later!
             return rawRequest;
         }
 
-        std::string getUri() {
-            return uri;
+        std::string getRequestedPath() {
+            return path;
         }
 };
 
@@ -128,7 +127,7 @@ class InternetHttpSocket {
 
         size_t snd(HttpResponse& response) {
             std::string message = response.getData();
-            return send(connection_fd, message.c_str(), message.length() * sizeof(char), 0);
+            return send(connection_fd, message.c_str(), message.length() * sizeof(char), 0); // is this causing the segfaults?
         }
 };
 
