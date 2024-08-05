@@ -32,6 +32,7 @@ std::vector<std::string> split(std::string str, std::string delimiter) {
     }
     return result;
 }
+
 // where to put 400 bad request..
 // what headers to support?
 class HttpRequest {
