@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <filesystem>
+#include <memory>
 #include "http.h"
 
 std::string workingDirectory;
@@ -22,23 +23,22 @@ bool safe_path(std::string path) {
 }
 
 // find file and put it in a response (resolves request and creates response)
-HttpResponse& createResponse(HttpRequest request) {
+std::unique_ptr<HttpResponse> createResponse(HttpRequest request) {
+    if (!request.isGood()) 
+        return std::make_unique<HttpResponse>(400, "BAD REQUEST", "");
+    
     std::string requestPath = request.getRequestedPath();
-    if (!safe_path(requestPath)) {
-        HttpResponse &ret = *new HttpResponse(401, "UNAUTHORIZED", "You can't go there");
-        return ret;
-    }
-    if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath)) {
-        HttpResponse &ret = *new HttpResponse(404, "NOT FOUND", "File Not Found");
-        return ret;
-    }
+    if (!safe_path(requestPath))
+        return std::make_unique<HttpResponse>(401, "UNAUTHORIZED", "You can't go there");
+
+    if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath)) 
+        return std::make_unique<HttpResponse>(404, "NOT FOUND", "File Not Found");
+   
     std::ifstream fl(request.getRequestedPath(), std::ifstream::binary);
     char data[1024];
     fl.read(data, 1024);
     std::string dstring(data, fl.gcount());
-    HttpResponse& response = *new HttpResponse(200, "OK", dstring); // <- mem leak I know
-    return response;
-
+    return std::make_unique<HttpResponse>(200, "OK", dstring); // <- mem leak I know
 } 
 
 void initWorkingDirectory() {
