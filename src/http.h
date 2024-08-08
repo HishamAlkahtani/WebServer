@@ -39,18 +39,25 @@ class HttpRequest {
     std::string method;
     std::string path;
     std::string rawRequest;
+    bool goodness;
 
     public:
         HttpRequest(char* request) {
+            goodness = true;
             rawRequest = std::string(request);
             std::vector<std::string> headerLines = split(rawRequest, CRLF);
             std::vector<std::string> firstLine = split(headerLines[0], " ");
-            if (firstLine.size() != 3); // 400 bad request! what to do? throw smth to be caught another place? I guess so , better than creating a bad object
+            if (firstLine.size() != 3) {
+                goodness = false;
+                return;
+            } 
 
             if (firstLine[0] != std::string("GET")
              && firstLine[0] != std::string("POST")
-             && firstLine[0] != std::string("DELETE"))
-             ; // 400 BAD REQUEST ALSO
+             && firstLine[0] != std::string("DELETE")) {
+                goodness = false;
+                return;
+            }
             else 
                 method = firstLine[0];
 
@@ -63,6 +70,10 @@ class HttpRequest {
 
         std::string getRequestedPath() {
             return path;
+        }
+
+        bool isGood() {
+            return goodness;
         }
 };
 
@@ -119,6 +130,7 @@ class InternetHttpSocket {
         }
 
         HttpRequest recieve() {
+            // change unique pointer? requests maybe large if they are post
             char* buffer = new char[2048];
             recv(connection_fd, (void*) buffer, 2048, 0);
             HttpRequest request(buffer); // change to unique pointer? oh this is starting to get messy
@@ -126,8 +138,8 @@ class InternetHttpSocket {
             return request;
         }
 
-        size_t snd(HttpResponse& response) {
-            std::string message = response.getData();
+        size_t snd(std::unique_ptr<HttpResponse> response) {
+            std::string message = response->getData();
             return send(connection_fd, message.c_str(), message.length() * sizeof(char), 0); // is this causing the segfaults?
         }
 };
