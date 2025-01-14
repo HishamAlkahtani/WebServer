@@ -7,8 +7,6 @@
 
 #define CRLF std::string("\r\n")
 
-// this is fucked I need to rewrite everything
-
 // Splits string str by delimiter. Delimiter can have multiple characters
 // and will be treated as one string that the function will look for.
 inline std::vector<std::string> split(std::string str, std::string delimiter);
@@ -58,8 +56,6 @@ public:
     bool isActive;
 
     InternetHttpSocket(sockaddr_in &addr, int fd);
-
-    ~InternetHttpSocket();
 
     std::string getIp();
 
