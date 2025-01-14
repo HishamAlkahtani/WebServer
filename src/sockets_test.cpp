@@ -6,54 +6,21 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <memory>
-#include "http.h"
+#include "http.hpp"
+#include "WebServer.cpp"
 
-std::string workingDirectory;
-
-// check if file is under server root
-// returns false if file exists and is out of boudns, false otherwise
-bool safe_path(std::string path) {
-    char* rp = realpath(path.c_str(), NULL);
-    if (!rp)
-        return true; 
-    std::string realPath(rp);
-    free(rp);
-    std::cout << "User wants realpath: " << realPath << std::endl;
-    return true;
+int main()
+{
+    WebServer server(8080, 2);
+    server.start();
 }
 
-// find file and put it in a response (resolves request and creates response)
-std::unique_ptr<HttpResponse> createResponse(HttpRequest request) {
-    if (!request.isGood()) 
-        return std::make_unique<HttpResponse>(400, "BAD REQUEST", "");
-    
-    std::string requestPath = request.getRequestedPath();
-    if (!safe_path(requestPath))
-        return std::make_unique<HttpResponse>(401, "UNAUTHORIZED", "You can't go there");
-
-    if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath)) 
-        return std::make_unique<HttpResponse>(404, "NOT FOUND", "File Not Found");
-   
-    std::ifstream fl(request.getRequestedPath(), std::ifstream::binary);
-    char data[1024];
-    fl.read(data, 1024);
-    std::string dstring(data, fl.gcount());
-    return std::make_unique<HttpResponse>(200, "OK", dstring); // <- mem leak I know
-} 
-
-void initWorkingDirectory() {
-    char buff[4095];
-    memset(buff, 0, sizeof(char) * 4095);
-    getcwd(buff, sizeof(char) * 4095);
-    workingDirectory = buff;
-}
-
-int main() {
+/*int main() {
     initWorkingDirectory();
     std::cout << "Server started from with root directory: " << workingDirectory << std::endl;
     ServerSocket socket(8080);
     InternetHttpSocket peer = socket.getConnection();
-    for (int i = 0; i <= 10; i++) { 
+    for (int i = 0; i <= 10; i++) {
         HttpRequest request = peer.recieve();
 
         std::cout << "\nMessage Recieved!\n";
@@ -64,11 +31,11 @@ int main() {
 
     std::cout << "Program terminating!";
     return 0;
-}
+}*/
 
-/* 
+/*
     A browser has two ways of knowing that the response from the server is complete,
-    either the server closes the tcp connection after completion, or the server specifies a 
+    either the server closes the tcp connection after completion, or the server specifies a
     Content-Length header.
 */
 
@@ -83,19 +50,19 @@ every time! this is ridiculous! for now a hacky fix is to close every socket aft
 (InternetHttpSocket destructor closes the socket, thus sending everything in its buffer).. but that would have
 horrible performance! As launching a new thread for just to make a single response will be annoying...
 or maybe the threads get passed sockets that they send one response over and then close them? but this means every
-request has to requeue! This is confusing. 
-two options: 1- every connection responds to one request only then close the socket.. but this is the 
+request has to requeue! This is confusing.
+two options: 1- every connection responds to one request only then close the socket.. but this is the
                 old way of doing things! HTTP/0.9! I want this to be HTTP/1.1
              2- somehow find a way to control (or force) when the data gets sent from the
                 os buffer of the socket... IDK how to do that. maybe TCP_NODELAY? or maybe
-                turnign TCP_NODELAY on and off to enforce a flush? 
-                
+                turnign TCP_NODELAY on and off to enforce a flush?
+
 */
 
 /* call socket(), specify domain and type and protocol. AF_INET = internet domain.
     SOCK_STREAM is the type, and 0 is the default protocol (tcp). (see man 7 ip)
 
-   socket() creates a socket in address space (look man socket), but no name is 
+   socket() creates a socket in address space (look man socket), but no name is
    given to it for other processes to connect to it. we then use bind, to fully
    initiate the socket, and specify the port and all the necessary info through
    a the appropriate struct sockaddr... which is in our case struct sockaddr_in
@@ -104,11 +71,10 @@ two options: 1- every connection responds to one request only then close the soc
 
     we also have to set sin_addr which is of type struct in_addr... and wtf is that?
 
-    
+
 */
 
-
-/* 
+/*
 
 from "man socket"
 Sockets of type SOCK_STREAM are full-duplex byte streams.  They do  not
@@ -125,7 +91,6 @@ described in send(2) and received as described in recv(2).
 A file descriptor is an index in an array of pointers called file descriptor tables, these
 pointers point to files somewhere in memory. since we are on linux, which treats everything
 as a file, sockets are going to be just that, file descriptors that are an index to the same
-table as files, and they point to somewhere in memory where you can read/write, and the os 
+table as files, and they point to somewhere in memory where you can read/write, and the os
 handles the rest
 */
-
