@@ -122,6 +122,12 @@ InternetHttpSocket::InternetHttpSocket(sockaddr_in &addr, int fd)
     isActive = true;
 }
 
+InternetHttpSocket::InternetHttpSocket()
+{
+    isActive = false;
+    connection_fd = -1;
+}
+
 std::string InternetHttpSocket::getIp()
 {
     return ip;

@@ -57,6 +57,9 @@ public:
 
     InternetHttpSocket(sockaddr_in &addr, int fd);
 
+    // for convenience. doesn't create a valid socket.
+    InternetHttpSocket();
+
     std::string getIp();
 
     HttpRequest recieve();
