@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <cstring>
 #include <memory>
+#include <atomic>
 #include "http.hpp"
 
 static int numOfThreads = 0;
@@ -17,6 +18,7 @@ class HttpServerThread
     int threadNum;
     InternetHttpSocket activeSocket;
     std::thread thread;
+    bool threadStarted;
 
     std::string workingDirectory;
 
@@ -64,24 +66,54 @@ class HttpServerThread
     }
 
 public:
-    HttpServerThread(InternetHttpSocket socket) : activeSocket(socket)
+    // this flag is just for prototyping, this should be changed later to something
+    // thread safe, probably condition_variable so the thread can sleep waiting for it
+    bool isActive;
+
+    // DEFAULT CONSTRUCTOR DOES NOT CREATE A THREAD! OBJECTS CREATED BY
+    // THE DEFAULT CONSTRUCTOR SHOULD BE DISCARDED!
+    HttpServerThread()
     {
         threadNum = numOfThreads++;
         initWorkingDirectory();
-        thread = std::thread(std::ref(*this));
+        isActive = false;
     }
 
     void operator()()
     {
         // Do Actual HttpSession Work
         std::cout << "This is thread: " << threadNum << std::endl;
-
-        while (activeSocket.isActive)
+        while (true)
         {
-            HttpRequest request = activeSocket.recieve();
-            std::cout << "Request Recieved!";
-            activeSocket.snd(createResponsee(request));
+            while (activeSocket.isActive)
+            {
+                HttpRequest request = activeSocket.recieve();
+                std::cout << "Request Recieved!";
+                activeSocket.snd(createResponsee(request));
+            }
+
+            if (!activeSocket.isActive)
+                /* Set flag to indicate that thread is sleeping
+                   so load balancer can assign new socket, then sleep and  wait*/
+                ;
         }
+    }
+
+    void assignClient(InternetHttpSocket socket)
+    {
+        activeSocket = socket;
+        isActive = activeSocket.isActive;
+    }
+
+    void startThread()
+    {
+        thread = std::thread(std::ref(*this));
+        threadStarted = true;
+    }
+
+    bool threadHasStarted()
+    {
+        return threadStarted;
     }
 
     ~HttpServerThread()
