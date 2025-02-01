@@ -56,6 +56,7 @@ class HttpServerThread
         return std::make_unique<HttpResponse>(200, "OK", dstring); // <- mem leak I know
     }
 
+    // this shouldn't reall be here, TODO: Move somewhere else... this is universal between all threads.
     void initWorkingDirectory()
     {
         char buff[4095];
@@ -67,14 +68,15 @@ class HttpServerThread
 public:
     // this flag is just for prototyping, this should be changed later to something
     // thread safe, probably condition_variable so the thread can sleep waiting for it
-    bool isActive;
+    // right now without sleeping mechanisms, threads waste CPU cycles waiting for clients
+    std::atomic<bool> threadActive;
 
     // DEFAULT CONSTRUCTOR DOES NOT CREATE A THREAD! OBJECTS CREATED BY
     // THE DEFAULT CONSTRUCTOR SHOULD BE DISCARDED!
     HttpServerThread()
     {
         initWorkingDirectory();
-        isActive = false;
+        threadActive.store(false);
     }
 
     void operator()()
@@ -89,16 +91,14 @@ public:
             }
 
             if (!activeSocket.isActive)
-                /* Set flag to indicate that thread is sleeping
-                   so load balancer can assign new socket, then sleep and  wait*/
-                ;
+                threadActive.store(false);
         }
     }
 
     void assignClient(InternetHttpSocket socket)
     {
         activeSocket = socket;
-        isActive = activeSocket.isActive;
+        threadActive.store(activeSocket.isActive);
     }
 
     void startThread()
