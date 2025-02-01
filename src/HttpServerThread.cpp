@@ -15,7 +15,6 @@ static int numOfThreads = 0;
 
 class HttpServerThread
 {
-    int threadNum;
     InternetHttpSocket activeSocket;
     std::thread thread;
     bool threadStarted;
@@ -74,15 +73,12 @@ public:
     // THE DEFAULT CONSTRUCTOR SHOULD BE DISCARDED!
     HttpServerThread()
     {
-        threadNum = numOfThreads++;
         initWorkingDirectory();
         isActive = false;
     }
 
     void operator()()
     {
-        // Do Actual HttpSession Work
-        std::cout << "This is thread: " << threadNum << std::endl;
         while (true)
         {
             while (activeSocket.isActive)

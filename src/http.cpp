@@ -160,7 +160,7 @@ HttpRequest InternetHttpSocket::recieve()
     else if (length == 0)
     {
         // no messages available & peer has performed an orderly shutdown
-        // TODO
+        isActive = false;
     }
 
     HttpRequest request(buffer);
