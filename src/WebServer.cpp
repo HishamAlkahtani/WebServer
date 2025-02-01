@@ -20,7 +20,7 @@ public:
     {
         while (true)
         {
-            std::cout << "New Connection" << std::endl;
+            std::cout << "New Connection Request" << std::endl;
             InternetHttpSocket clientSocket = serverSocket.getConnection();
             loadBalancer.enqueu_socket(clientSocket);
         }

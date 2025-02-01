@@ -5,8 +5,6 @@
 #include "HttpServerThread.cpp"
 #include "http.hpp"
 
-// TODO: Client Queue; single producer single consumer ring buffer
-
 class LoadBalancer
 {
     HttpServerThread *threadPool;
@@ -48,7 +46,7 @@ public:
             {
                 // This might be a bottleneck, measure performance and see if it needs
                 // something more sophisticated, maybe a condition variable?
-                std::cout << "LBThread sleeping because n oclients" << queueHead << queueTail << std::endl;
+                // std::cout << "LBThread sleeping because n oclients" << queueHead << queueTail << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
                 continue;
             }
@@ -60,6 +58,7 @@ public:
                 {
                     threadPool[i].assignClient(clientQueue[queueHead]);
                     clientAssigned = true;
+                    std::cout << "Client assigned to thread #" << i << std::endl;
                 }
             }
 
@@ -68,6 +67,7 @@ public:
                 threadPool[activeThreads].assignClient(clientQueue[queueHead]);
                 threadPool[activeThreads++].startThread();
                 clientAssigned = true;
+                std::cout << "Client assigned to thread #" << activeThreads - 1 << std::endl;
             }
 
             if (clientAssigned)
@@ -78,7 +78,6 @@ public:
     void
     enqueu_socket(InternetHttpSocket socket)
     {
-        std::cout << "Client enqueu call" << std::endl;
         bool clientAdded = false;
         while (!clientAdded)
         {
