@@ -54,7 +54,7 @@ public:
             bool clientAssigned = false;
             for (int i = 0; i < activeThreads; i++)
             {
-                if (!threadPool[i].isActive)
+                if (!threadPool[i].threadActive.load())
                 {
                     threadPool[i].assignClient(clientQueue[queueHead]);
                     clientAssigned = true;
