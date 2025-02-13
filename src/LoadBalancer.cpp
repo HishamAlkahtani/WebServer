@@ -52,7 +52,7 @@ public:
             }
 
             bool clientAssigned = false;
-            for (int i = 0; i < activeThreads; i++)
+            for (int i = 0; i < activeThreads && !clientAssigned; i++)
             {
                 if (!threadPool[i].isThreadActive())
                 {
