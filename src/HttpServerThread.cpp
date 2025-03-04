@@ -9,6 +9,8 @@
 #include <memory>
 #include <atomic>
 #include <mutex>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include <condition_variable>
 #include "http.hpp"
 #include "HttpRequestHandler.hpp"
@@ -28,38 +30,39 @@ class HttpServerThread
     // shared between server threads and load balancer thread
     std::atomic<bool> threadActive;
 
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-    // this flag is just for prototyping, this should be changed later to something
-    // thread safe, probably condition_variable so the thread can sleep waiting for it
-    // right now without sleeping mechanisms, threads waste CPU cycles waiting for clients
     HttpRequestHandler &requestHandler;
 
-    // DEFAULT CONSTRUCTOR DOES NOT CREATE A THREAD! OBJECTS CREATED BY
-    // THE DEFAULT CONSTRUCTOR SHOULD BE DISCARDED!
     HttpServerThread() : requestHandler(getRequestHandler())
     {
         threadActive.store(false);
         threadNum = numOfThreads++;
+        logger = spdlog::stdout_color_mt(std::string("Server Thread ") + std::to_string(threadNum));
     }
 
     void operator()()
     {
+        logger->info("Thread started");
+
         while (true)
         {
             while (activeSocket.isActive)
             {
                 HttpRequest request = activeSocket.recieve();
-                std::cout << "Request Recieved!";
-                activeSocket.snd(requestHandler.createResponsee(request));
+                std::unique_ptr<HttpResponse> response = requestHandler.createResponsee(request);
+                activeSocket.snd(response.get());
+                logger->info("\"" + request.getMethod() + " " + request.getRequestedPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
             }
 
             if (!activeSocket.isActive)
             {
                 std::unique_lock<std::mutex> lock(threadActiveMutex);
                 threadActive.store(false);
-                std::cout << "Thread #" << threadNum << " will sleep" << std::endl;
+                logger->trace("Thread going to sleep");
                 cv.wait(lock);
-                std::cout << "Thread #" << threadNum << " woke up" << std::endl;
+                logger->trace("Thread woke up");
             }
         }
     }

@@ -6,11 +6,14 @@
 #include <stdlib.h>
 #include <filesystem>
 #include <memory>
+#include <spdlog/spdlog.h>
 #include "http.hpp"
 #include "WebServer.cpp"
 
 int main()
 {
+    spdlog::set_pattern("[%Y-%m-%d %H:%M:%S.%e] [%-16n] [%^%-5l%$] %v");
+    spdlog::set_level(spdlog::level::trace);
     WebServer server(8080, 2);
     server.start();
 }

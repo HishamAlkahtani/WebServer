@@ -57,24 +57,25 @@ HttpRequest::HttpRequest(char *request)
         return;
     }
 
-    std::cout << "Good Request" << std::endl;
-
     if (firstLine[0] != std::string("GET") && firstLine[0] != std::string("POST") && firstLine[0] != std::string("DELETE"))
     {
-        std::cout << "FATAL! NOT GOOD REQUEST!";
         goodness = false;
         return;
     }
     else
         method = firstLine[0];
 
-    path = std::string(".") + firstLine[1];
-    std::cout << "HttpRequest Object Finished Construction!" << std::endl;
+    path = firstLine[1];
 }
 
 HttpRequest::HttpRequest()
 {
     goodness = false;
+}
+
+std::string HttpRequest::getMethod()
+{
+    return method;
 }
 
 std::string HttpRequest::getRawRequest()
@@ -106,6 +107,11 @@ std::string HttpResponse::getData()
     header += CRLF;
     std::string message = header + body;
     return message;
+}
+
+int HttpResponse::getResponseCode()
+{
+    return responseCode;
 }
 
 void HttpResponse::addResponseHeader(std::string key, std::string value)
@@ -168,7 +174,7 @@ HttpRequest InternetHttpSocket::recieve()
     return request;
 }
 
-size_t InternetHttpSocket::snd(std::unique_ptr<HttpResponse> response)
+size_t InternetHttpSocket::snd(HttpResponse *response)
 {
     if (!isActive)
         return -1;
@@ -208,6 +214,5 @@ InternetHttpSocket ServerSocket::getConnection()
     socklen_t peerlen = sizeof(struct sockaddr_in);
     int connection_fd = accept(socket_fd, (sockaddr *)&peeraddr, &peerlen);
     InternetHttpSocket ret = InternetHttpSocket(peeraddr, connection_fd);
-    std::cout << "Got Connection. Errorno: " << errno << std::endl;
     return ret;
 }

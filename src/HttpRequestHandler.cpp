@@ -19,9 +19,9 @@ bool HttpRequestHandler::safe_path(std::string path)
     char *rp = realpath(path.c_str(), NULL);
     if (!rp)
         return true;
+    // TODO: actually check the path...
     std::string realPath(rp);
     free(rp);
-    std::cout << "User wants realpath: " << realPath << std::endl;
     return true;
 }
 
@@ -42,19 +42,27 @@ HttpRequestHandler::HttpRequestHandler()
 std::unique_ptr<HttpResponse> HttpRequestHandler::createResponsee(HttpRequest request)
 {
     if (!request.isGood())
+    {
         return std::make_unique<HttpResponse>(400, "BAD REQUEST", "");
+    }
 
-    std::string requestPath = request.getRequestedPath();
+    std::string requestPath = "." + request.getRequestedPath();
+
+    /*
+        NOTE: the path in the HttpRequest object is an absolute path, so never use
+        getRequestedPath() after this point. use requestPath only, as it turns it to a
+        relative URL (relative to server root).
+    */
+
     if (!safe_path(requestPath))
         return std::make_unique<HttpResponse>(401, "UNAUTHORIZED", "You can't go there");
 
     if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath))
         return std::make_unique<HttpResponse>(404, "NOT FOUND", "File Not Found");
 
-    std::ifstream fl(request.getRequestedPath(), std::ifstream::binary);
-    char data[8192]; // why tf did you write this so max file size is 1024?
-    // i know you are prototyping and stuff buy by now you should know prototypes don't exist
-    // every code you write ends up being used.
+    std::ifstream fl(requestPath, std::ifstream::binary);
+    char data[8192];
+
     fl.read(data, 8192);
     std::string dstring(data, fl.gcount());
     return std::make_unique<HttpResponse>(200, "OK", dstring); // <- mem leak I know
