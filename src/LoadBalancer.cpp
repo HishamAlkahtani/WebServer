@@ -2,6 +2,8 @@
 
 #include <thread>
 #include <vector>
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 #include "HttpServerThread.cpp"
 #include "http.hpp"
 
@@ -19,8 +21,10 @@ class LoadBalancer
     int maxThreads;
     int activeThreads;
 
+    std::shared_ptr<spdlog::logger> logger;
+
 public:
-    LoadBalancer(int maxThreads) : maxThreads(maxThreads)
+    LoadBalancer(int maxThreads) : maxThreads(maxThreads), logger(spdlog::stdout_color_st("Load Balancer"))
     {
         queueLength = 1024;
         activeThreads = 0;
@@ -38,7 +42,7 @@ public:
     // Takes clients from head of queue, and assigns them to available threads
     void operator()()
     {
-        std::cout << "Load Balancing Thread Started!" << std::endl;
+        logger->info("Load balancing thread started");
 
         while (true)
         {
@@ -46,8 +50,7 @@ public:
             {
                 // This might be a bottleneck, measure performance and see if it needs
                 // something more sophisticated, maybe a condition variable?
-                // std::cout << "LBThread sleeping because n oclients" << queueHead << queueTail << std::endl;
-                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                std::this_thread::sleep_for(std::chrono::milliseconds(20));
                 continue;
             }
 
@@ -58,7 +61,7 @@ public:
                 {
                     threadPool[i].assignClient(clientQueue[queueHead]);
                     clientAssigned = true;
-                    std::cout << "Client assigned to thread #" << i << std::endl;
+                    logger->debug(std::string("Client assigned to thread #") + std::to_string(i));
                 }
             }
 
@@ -67,7 +70,8 @@ public:
                 threadPool[activeThreads].assignClient(clientQueue[queueHead]);
                 threadPool[activeThreads++].startThread();
                 clientAssigned = true;
-                std::cout << "Client assigned to thread #" << activeThreads - 1 << std::endl;
+                logger->debug("All threads are busy, starting new thread");
+                logger->debug(std::string("Client assigned to thread #") + std::to_string(activeThreads - 1));
             }
 
             if (clientAssigned)

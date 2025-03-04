@@ -25,6 +25,8 @@ public:
 
     std::string getRawRequest();
 
+    std::string getMethod();
+
     std::string getRequestedPath();
 
     bool isGood();
@@ -41,6 +43,8 @@ public:
     HttpResponse(int responseCode, std::string responseMessage, std::string body);
 
     std::string getData();
+
+    int getResponseCode();
 
     void addResponseHeader(std::string key, std::string value);
 };
@@ -64,7 +68,7 @@ public:
 
     HttpRequest recieve();
 
-    size_t snd(std::unique_ptr<HttpResponse> response);
+    size_t snd(HttpResponse *response);
 };
 
 class ServerSocket
