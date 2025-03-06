@@ -10,6 +10,8 @@
 class LoadBalancer
 {
     HttpServerThread *threadPool;
+    int maxThreads;
+    int activeThreads;
 
     InternetHttpSocket *clientQueue;
     int queueHead;
@@ -17,9 +19,6 @@ class LoadBalancer
     int queueLength;
 
     std::thread loadBalancerThread;
-
-    int maxThreads;
-    int activeThreads;
 
     std::shared_ptr<spdlog::logger> logger;
 
@@ -67,10 +66,10 @@ public:
 
             if (!clientAssigned && activeThreads < maxThreads)
             {
+                logger->debug("All threads are busy, starting new thread");
                 threadPool[activeThreads].assignClient(clientQueue[queueHead]);
                 threadPool[activeThreads++].startThread();
                 clientAssigned = true;
-                logger->debug("All threads are busy, starting new thread");
                 logger->debug(std::string("Client assigned to thread #") + std::to_string(activeThreads - 1));
             }
 

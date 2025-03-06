@@ -16,7 +16,7 @@ class HttpRequestHandler
 
     // Check if file is under server root.
     // Returns false if file exists and is out of bounds, true otherwise.
-    bool safe_path(std::string path);
+    bool safePath(std::string path);
 
     void initWorkingDirectory();
 

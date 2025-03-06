@@ -10,19 +10,20 @@
 #include "http.hpp"
 #include "HttpRequestHandler.hpp"
 
-std::string workingDirectory;
-
 // check if file is under server root
-// returns false if file exists and is out of boudns, false otherwise
-bool HttpRequestHandler::safe_path(std::string path)
+// returns false if file exists and is out of bounds, true otherwise
+bool HttpRequestHandler::safePath(std::string path)
 {
     char *rp = realpath(path.c_str(), NULL);
+
     if (!rp)
         return true;
-    // TODO: actually check the path...
+
     std::string realPath(rp);
     free(rp);
-    return true;
+
+    // realPath should start with workingDirectory
+    return realPath.substr(0, workingDirectory.length()) == workingDirectory;
 }
 
 void HttpRequestHandler::initWorkingDirectory()
@@ -54,7 +55,7 @@ std::unique_ptr<HttpResponse> HttpRequestHandler::createResponsee(HttpRequest re
         relative URL (relative to server root).
     */
 
-    if (!safe_path(requestPath))
+    if (!safePath(requestPath))
         return std::make_unique<HttpResponse>(401, "UNAUTHORIZED", "You can't go there");
 
     if (!std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath))
