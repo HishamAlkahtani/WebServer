@@ -2,28 +2,50 @@
 
 #include <netinet/in.h>
 #include <vector>
+#include <map>
 #include <string>
 #include <memory>
 
 #define CRLF std::string("\r\n")
 
-// Splits string str by delimiter. Delimiter can have multiple characters
-// and will be treated as one string that the function will look for.
-inline std::vector<std::string> split(std::string str, std::string delimiter);
+/**
+ * @brief Splits a string by a specified delimiter
+ *
+ * @param str String to split
+ * @param delimiter String that marks where to split (can be multi-character)
+ * @return std::vector<std::string> Vector containing the split substrings
+ *
+ * Splits the input string at each occurrence of the delimiter. The delimiter is not
+ * included in the results. Empty strings are preserved when delimiters appear
+ * consecutively or at the string boundaries.
+ */
+inline std::vector<std::string> split(std::string &str, std::string delimiter);
 
 class HttpRequest
 {
     std::string method;
     std::string path;
     std::string rawRequest;
+    std::string body;
+    std::map<std::string, std::string> headers;
     bool goodness;
+
+    /**
+     * @brief Parses HTTP headers from request lines
+     *
+     * @param requestLines Vector of strings containing request content split by CRLF
+     * @return Index of the empty line separating headers from body (-1 if malformed)
+     *
+     * Processes each line after the request line until an empty line is found,
+     * storing valid headers in the headers map. The body (if present) starts at
+     * headerLines[return_value + 1]. Sets goodness to false if headers are malformed.
+     */
+    std::size_t parseHeaders(std::vector<std::string> &requestLines);
 
 public:
     HttpRequest(char *request);
 
     HttpRequest();
-
-    std::string getRawRequest();
 
     std::string getMethod();
 
@@ -37,6 +59,7 @@ class HttpResponse
     int responseCode;
     std::string responseMessage;
     std::string body;
+    // TODO: Change implementation to map to allow better customization
     std::vector<std::string> headers;
 
 public:

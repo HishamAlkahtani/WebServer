@@ -23,7 +23,7 @@ class HttpRequestHandler
 public:
     HttpRequestHandler();
 
-    std::unique_ptr<HttpResponse> createResponsee(HttpRequest request);
+    std::unique_ptr<HttpResponse> createResponse(HttpRequest request);
 };
 
 HttpRequestHandler &getRequestHandler();

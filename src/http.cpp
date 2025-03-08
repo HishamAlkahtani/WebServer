@@ -14,11 +14,11 @@
 #include <cstring>
 #include <errno.h>
 
-inline std::vector<std::string> split(std::string str, std::string delimiter)
+inline std::vector<std::string> split(std::string &str, std::string delimiter)
 {
 
     std::vector<std::string> result;
-    size_t startOfLine = 0;
+    std::size_t startOfLine = 0;
     while (startOfLine < str.size())
     {
         std::size_t nextOccurrence = str.find(delimiter, startOfLine);
@@ -41,15 +41,15 @@ HttpRequest::HttpRequest(char *request)
 {
     goodness = true;
     rawRequest = std::string(request);
-    std::vector<std::string> headerLines = split(rawRequest, CRLF);
+    std::vector<std::string> requestLines = split(rawRequest, CRLF);
 
-    if (headerLines.size() == 0)
+    if (requestLines.size() == 0)
     {
         goodness = false;
         return;
     }
 
-    std::vector<std::string> firstLine = split(headerLines[0], " ");
+    std::vector<std::string> firstLine = split(requestLines[0], " ");
 
     if (firstLine.size() != 3)
     {
@@ -62,10 +62,47 @@ HttpRequest::HttpRequest(char *request)
         goodness = false;
         return;
     }
-    else
-        method = firstLine[0];
 
+    method = firstLine[0];
     path = firstLine[1];
+
+    // Parse the rest of the HTTP headers...
+    std::size_t lastHeader = parseHeaders(requestLines);
+
+    if ((goodness && lastHeader != -1) && (lastHeader == requestLines.size() - 2))
+    {
+        // TODO: Check Content-Length, set some flag if the full body has not been received (more data to recieve)
+        body = requestLines[lastHeader + 1];
+    }
+    else if (lastHeader < requestLines.size() - 2)
+    {
+        goodness = false;
+        return;
+    }
+}
+
+std::size_t HttpRequest::parseHeaders(std::vector<std::string> &requestLines)
+{
+    for (std::size_t i = 1; i < requestLines.size(); i++)
+    {
+        std::string requestLine = requestLines[i];
+        if (requestLine.length() == 0)
+            return i;
+
+        std::vector<std::string> pair = split(requestLine, ": ");
+        if (pair.size() >= 2)
+        {
+            headers[pair[0]] = pair[1];
+        }
+        else
+        {
+            goodness = false;
+            return -1;
+        }
+    }
+
+    goodness = false;
+    return -1;
 }
 
 HttpRequest::HttpRequest()
@@ -76,11 +113,6 @@ HttpRequest::HttpRequest()
 std::string HttpRequest::getMethod()
 {
     return method;
-}
-
-std::string HttpRequest::getRawRequest()
-{ // delete later!
-    return rawRequest;
 }
 
 std::string HttpRequest::getRequestedPath()

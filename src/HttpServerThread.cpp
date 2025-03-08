@@ -51,7 +51,7 @@ public:
             while (activeSocket.isActive)
             {
                 HttpRequest request = activeSocket.recieve();
-                std::unique_ptr<HttpResponse> response = requestHandler.createResponsee(request);
+                std::unique_ptr<HttpResponse> response = requestHandler.createResponse(request);
                 activeSocket.snd(response.get());
                 logger->info("\"" + request.getMethod() + " " + request.getRequestedPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
             }

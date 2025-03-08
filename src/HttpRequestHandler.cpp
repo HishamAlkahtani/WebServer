@@ -40,7 +40,7 @@ HttpRequestHandler::HttpRequestHandler()
 }
 
 // find file and put it in a response (resolves request and creates response)
-std::unique_ptr<HttpResponse> HttpRequestHandler::createResponsee(HttpRequest request)
+std::unique_ptr<HttpResponse> HttpRequestHandler::createResponse(HttpRequest request)
 {
     if (!request.isGood())
     {
