@@ -12,6 +12,7 @@
 #include <memory>
 #include <vector>
 #include <cstring>
+#include <cstdlib>
 #include <errno.h>
 
 inline std::vector<std::string> split(std::string &str, std::string delimiter)
@@ -64,7 +65,24 @@ HttpRequest::HttpRequest(char *request)
     }
 
     method = firstLine[0];
-    path = firstLine[1];
+    originalPath = firstLine[1];
+
+    // make the path realtive to working directory (server root)
+    std::string relativePath = "." + originalPath;
+
+    // transforming the realtive path to canonical absolute path
+    char *realPath = realpath(relativePath.c_str(), NULL);
+
+    if (!realPath)
+    {
+        resourceExistence = false;
+    }
+    else
+    {
+        resourceExistence = true;
+        resourcePath = realPath;
+        free(realPath);
+    }
 
     // Parse the rest of the HTTP headers...
     std::size_t lastHeader = parseHeaders(requestLines);
@@ -115,14 +133,24 @@ std::string HttpRequest::getMethod()
     return method;
 }
 
-std::string HttpRequest::getRequestedPath()
+std::string HttpRequest::getOriginalPath()
 {
-    return path;
+    return originalPath;
+}
+
+std::string HttpRequest::getResourcePath()
+{
+    return resourcePath;
 }
 
 bool HttpRequest::isGood()
 {
     return goodness;
+}
+
+bool HttpRequest::resourceExists()
+{
+    return resourceExistence;
 }
 
 HttpResponse::HttpResponse(int responseCode, std::string responseMessage, std::string body)

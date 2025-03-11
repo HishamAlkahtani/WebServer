@@ -53,7 +53,7 @@ public:
                 HttpRequest request = activeSocket.recieve();
                 std::unique_ptr<HttpResponse> response = requestHandler.createResponse(request);
                 activeSocket.snd(response.get());
-                logger->info("\"" + request.getMethod() + " " + request.getRequestedPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
+                logger->info("\"" + request.getMethod() + " " + request.getOriginalPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
             }
 
             if (!activeSocket.isActive)
