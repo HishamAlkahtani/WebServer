@@ -206,7 +206,7 @@ HttpRequest InternetHttpSocket::recieve()
         return HttpRequest();
     }
 
-    char *buffer = new char[2048];
+    char *buffer = new char[2048]();
     size_t length = recv(connection_fd, (void *)buffer, 2048, 0);
     // TODO: some way to check if request is completely recieved!!!
 
