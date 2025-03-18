@@ -1,16 +1,17 @@
-#pragma once
+#include "http.hpp"
+#include "HttpRequestHandler.hpp"
 
 #include <filesystem>
 #include <fstream>
-#include <memory>
+#include <functional>
 #include <iostream>
-#include <unistd.h>
+#include <map>
+#include <memory>
+
 #include <cstdlib>
 #include <cstring>
-#include <functional>
-#include <map>
-#include "http.hpp"
-#include "HttpRequestHandler.hpp"
+
+#include <unistd.h>
 
 std::unique_ptr<HttpResponse> HttpRequestHandler::GET(HttpRequest &request)
 {

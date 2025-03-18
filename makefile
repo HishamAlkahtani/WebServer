@@ -1,8 +1,25 @@
-CC = g++
-LDFLAGS=-lspdlog -lfmt -pthread
+CXX = g++
+CXXFLAGS = -Wall -std=c++17 -Iinclude -Isrc
+LDFLAGS = -lspdlog -lfmt -pthread
 
-BIN_DIR=bin
+SRC_DIR = src
+BUILD_DIR = build
+BIN_DIR = bin
+SOURCES = $(wildcard $(SRC_DIR)/*.cpp)
+OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
+TARGET = $(BIN_DIR)/WebServer
 
+all: directories $(TARGET)
 
-all:
-	$(CC) src/http.hpp src/HttpServerThread.cpp src/LoadBalancer.cpp src/sockets_test.cpp src/WebServer.cpp src/HttpRequestHandler.cpp src/HttpRequestHandler.hpp src/http.cpp -o $(BIN_DIR)/WebServer $(LDFLAGS)
+directories:
+	mkdir -p $(BUILD_DIR)
+	mkdir -p $(BIN_DIR)
+
+$(TARGET): $(OBJECTS)
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+clean:
+	rm -rf $(BUILD_DIR) $(TARGET)

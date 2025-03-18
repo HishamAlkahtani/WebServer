@@ -1,12 +1,14 @@
-#pragma once
-#include <iostream>
-#include <string.h>
-#include <string>
-#include <unistd.h>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
 #include "http.hpp"
 #include "LoadBalancer.cpp"
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include <iostream>
+#include <string>
+
+#include <string.h>
+#include <unistd.h>
 
 class WebServer
 {

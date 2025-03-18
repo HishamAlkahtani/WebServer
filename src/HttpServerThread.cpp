@@ -1,19 +1,21 @@
-#pragma once
-
-#include <thread>
-#include <iostream>
-#include <fstream>
-#include <ostream>
-#include <unistd.h>
-#include <cstring>
-#include <memory>
-#include <atomic>
-#include <mutex>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include <condition_variable>
 #include "http.hpp"
 #include "HttpRequestHandler.hpp"
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
+
+#include <atomic>
+#include <condition_variable>
+#include <fstream>
+#include <iostream>
+#include <memory>
+#include <mutex>
+#include <ostream>
+#include <thread>
+
+#include <cstring>
+
+#include <unistd.h>
 
 static int numOfThreads = 0;
 

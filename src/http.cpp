@@ -1,19 +1,21 @@
 #include "http.hpp"
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <stdio.h>
-#include <stdexcept>
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <arpa/inet.h>
-#include <unistd.h>
 #include <iostream>
 #include <memory>
+#include <stdexcept>
 #include <vector>
-#include <cstring>
+
 #include <cstdlib>
+#include <cstring>
+#include <stdio.h>
+
+#include <arpa/inet.h>
 #include <errno.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 inline std::vector<std::string> split(std::string &str, std::string delimiter)
 {

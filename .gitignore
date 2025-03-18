@@ -1,2 +1,4 @@
 bin/
 misc/
+build/
+compile_commands.json

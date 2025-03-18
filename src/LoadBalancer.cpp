@@ -1,11 +1,11 @@
-#pragma once
+#include "http.hpp"
+#include "HttpServerThread.cpp"
+
+#include <spdlog/spdlog.h>
+#include <spdlog/sinks/stdout_color_sinks.h>
 
 #include <thread>
 #include <vector>
-#include <spdlog/spdlog.h>
-#include <spdlog/sinks/stdout_color_sinks.h>
-#include "HttpServerThread.cpp"
-#include "http.hpp"
 
 class LoadBalancer
 {
