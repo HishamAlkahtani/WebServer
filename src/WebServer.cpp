@@ -1,5 +1,6 @@
 #include "http.hpp"
 #include "LoadBalancer.cpp"
+#include "Config.hpp"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -12,14 +13,18 @@
 
 class WebServer
 {
+    Config config;
     ServerSocket serverSocket;
     LoadBalancer loadBalancer;
     std::shared_ptr<spdlog::logger> logger;
 
 public:
-    WebServer(int port, int maxThreads) : serverSocket(port), loadBalancer(maxThreads), logger(spdlog::stdout_color_st("Server Socket"))
+    WebServer() : config(Config::getConfigs()), serverSocket(config.getPort()),
+                  loadBalancer(config.getMaxThreadPoolSize()),
+                  logger(spdlog::stdout_color_st("Server Socket"))
     {
-        logger->info(std::string("Server initiated on port ") + std::to_string(port));
+        spdlog::set_pattern(config.getLoggingFormat());
+        logger->info(std::string("Server initiated on port ") + std::to_string(config.getPort()));
     }
 
     // blocking!
