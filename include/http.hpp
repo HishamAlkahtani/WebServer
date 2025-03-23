@@ -104,14 +104,17 @@ public:
 
 class InternetHttpSocket
 {
+    bool active;
     short sin_family;
     unsigned short sin_port;
     std::string ip;
     int connection_fd;
 
-public:
-    bool isActive;
+    std::size_t maxRequestSize;
 
+    void closeSocket();
+
+public:
     InternetHttpSocket(sockaddr_in &addr, int fd);
 
     // for convenience. doesn't create a valid socket.
@@ -119,9 +122,11 @@ public:
 
     std::string getIp();
 
-    HttpRequest recieve();
+    HttpRequest receive();
 
     size_t snd(HttpResponse *response);
+
+    bool isActive();
 };
 
 class ServerSocket

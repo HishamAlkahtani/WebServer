@@ -50,15 +50,20 @@ public:
 
         while (true)
         {
-            while (activeSocket.isActive)
+            while (activeSocket.isActive())
             {
-                HttpRequest request = activeSocket.recieve();
+                HttpRequest request = activeSocket.receive();
+
+                // calls to InternetHttpSocket::receive can change socket status.
+                if (!activeSocket.isActive())
+                    break;
+                
                 std::unique_ptr<HttpResponse> response = requestHandler.createResponse(request);
                 activeSocket.snd(response.get());
                 logger->info("\"" + request.getMethod() + " " + request.getOriginalPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
             }
 
-            if (!activeSocket.isActive)
+            if (!activeSocket.isActive())
             {
                 std::unique_lock<std::mutex> lock(threadActiveMutex);
                 threadActive.store(false);
@@ -74,7 +79,7 @@ public:
         activeSocket = socket;
         {
             std::lock_guard<std::mutex> lock(threadActiveMutex);
-            threadActive.store(activeSocket.isActive);
+            threadActive.store(activeSocket.isActive());
         }
         cv.notify_all();
     }
