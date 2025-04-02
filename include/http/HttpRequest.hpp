@@ -1,25 +1,8 @@
 #pragma once
 
-#include <netinet/in.h>
-#include <vector>
-#include <map>
 #include <string>
-#include <memory>
-
-#define CRLF std::string("\r\n")
-
-/**
- * @brief Splits a string by a specified delimiter
- *
- * @param str String to split
- * @param delimiter String that marks where to split (can be multi-character)
- * @return std::vector<std::string> Vector containing the split substrings
- *
- * Splits the input string at each occurrence of the delimiter. The delimiter is not
- * included in the results. Empty strings are preserved when delimiters appear
- * consecutively or at the string boundaries.
- */
-inline std::vector<std::string> split(std::string &str, std::string delimiter);
+#include <map>
+#include <vector>
 
 class HttpRequest
 {
@@ -82,61 +65,4 @@ public:
     bool isGood();
 
     bool resourceExists();
-};
-
-class HttpResponse
-{
-    int responseCode;
-    std::string responseMessage;
-    std::string body;
-    // TODO: Change implementation to map to allow better customization
-    std::vector<std::string> headers;
-
-public:
-    HttpResponse(int responseCode, std::string responseMessage, std::string body);
-
-    std::string getData();
-
-    int getResponseCode();
-
-    void addResponseHeader(std::string key, std::string value);
-};
-
-class InternetHttpSocket
-{
-    bool active;
-    short sin_family;
-    unsigned short sin_port;
-    std::string ip;
-    int connection_fd;
-
-    std::size_t maxRequestSize;
-
-    void closeSocket();
-
-public:
-    InternetHttpSocket(sockaddr_in &addr, int fd);
-
-    // for convenience. doesn't create a valid socket.
-    InternetHttpSocket();
-
-    std::string getIp();
-
-    HttpRequest receive();
-
-    size_t snd(HttpResponse *response);
-
-    bool isActive();
-};
-
-class ServerSocket
-{
-    int socket_fd;
-
-public:
-    ServerSocket(int port);
-
-    ~ServerSocket();
-
-    InternetHttpSocket getConnection();
 };

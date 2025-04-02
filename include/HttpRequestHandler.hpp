@@ -1,5 +1,8 @@
 #pragma once
 
+#include "http/HttpResponse.hpp"
+#include "http/HttpRequest.hpp"
+
 #include <filesystem>
 #include <fstream>
 #include <memory>
@@ -10,7 +13,6 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstring>
-#include "http.hpp"
 
 class HttpRequestHandler
 {

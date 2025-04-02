@@ -1,5 +1,6 @@
-#include "http.hpp"
 #include "HttpRequestHandler.hpp"
+#include "http/HttpRequest.hpp"
+#include "http/HttpResponse.hpp"
 
 #include <filesystem>
 #include <fstream>

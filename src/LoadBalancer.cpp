@@ -1,4 +1,3 @@
-#include "http.hpp"
 #include "HttpServerThread.cpp"
 
 #include <spdlog/spdlog.h>

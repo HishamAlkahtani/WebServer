@@ -1,5 +1,5 @@
-#include "http.hpp"
 #include "HttpRequestHandler.hpp"
+#include "http/InternetHttpSocket.hpp"
 
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
@@ -57,7 +57,7 @@ public:
                 // calls to InternetHttpSocket::receive can change socket status.
                 if (!activeSocket.isActive())
                     break;
-                
+
                 std::unique_ptr<HttpResponse> response = requestHandler.createResponse(request);
                 activeSocket.snd(response.get());
                 logger->info("\"" + request.getMethod() + " " + request.getOriginalPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
