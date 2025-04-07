@@ -23,6 +23,11 @@ std::size_t Config::getMaxRequestSize()
     return maxRequestSize;
 }
 
+std::size_t Config::getMaxResponseSize()
+{
+    return maxResponseSize;
+}
+
 std::size_t Config::getMaxThreadPoolSize()
 {
     return maxThreadPoolSize;
@@ -66,6 +71,7 @@ Config::Config() : logger(spdlog::stdout_color_st("Configuration"))
 
     loggingFormat = table["loggingFormat"].value<std::string>().value_or("[%Y-%m-%d %H:%M:%S.%e] [%-16n] [%^%-5l%$] %v");
     maxRequestSize = std::stoul(table["maxRequestSize"].value<std::string>().value_or("51200"));
+    maxResponseSize = std::stoul(table["maxResponseSize"].value<std::string>().value_or("1073741824")); // 1 GB default
     maxThreadPoolSize = std::stoul(table["maxThreadPoolSize"].value<std::string>().value_or("10"));
     port = std::stoi(table["port"].value<std::string>().value_or("8080"));
 
@@ -76,6 +82,7 @@ void Config::setDefaults()
 {
     port = 8080;
     maxRequestSize = 51200; // 50 KiB
+    maxResponseSize = 1073741824;
     maxThreadPoolSize = 10;
     loggingFormat = "[%Y-%m-%d %H:%M:%S.%e] [%-16n] [%^%-5l%$] %v";
 }
@@ -85,6 +92,7 @@ bool Config::createConfigFile()
     toml::table table{
         {"port", std::to_string(port)},
         {"maxRequestSize", std::to_string(maxRequestSize)},
+        {"maxResponseSize", std::to_string(maxResponseSize)},
         {"maxThreadPoolSize", std::to_string(maxThreadPoolSize)},
         {"loggingFormat", loggingFormat}};
 

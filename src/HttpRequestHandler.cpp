@@ -25,7 +25,7 @@ std::unique_ptr<HttpResponse> HttpRequestHandler::GET(HttpRequest &request)
 
     fl.read(data, 8192);
     std::string dstring(data, fl.gcount());
-    return std::make_unique<HttpResponse>(200, "OK", dstring); // <- mem leak I know
+    return std::make_unique<HttpResponse>(200, "OK", dstring);
 }
 
 bool HttpRequestHandler::safePath(std::string path)

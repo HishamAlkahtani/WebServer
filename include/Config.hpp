@@ -12,6 +12,8 @@ public:
 
     std::size_t getMaxRequestSize();
 
+    std::size_t getMaxResponseSize();
+
     std::size_t getMaxThreadPoolSize();
 
     std::string getLoggingFormat();
@@ -32,6 +34,7 @@ private:
     int port;
 
     std::size_t maxRequestSize;
+    std::size_t maxResponseSize;
     std::size_t maxThreadPoolSize;
 
     std::string loggingFormat;

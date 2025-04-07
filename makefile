@@ -10,7 +10,7 @@ SOURCES += $(wildcard $(SRC_DIR)/http/*.cpp)
 OBJECTS = $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SOURCES))
 TARGET = $(BIN_DIR)/WebServer
 
-all: directories $(TARGET)
+all: clean directories $(TARGET)
 
 directories:
 	mkdir -p $(BUILD_DIR)
