@@ -2,6 +2,7 @@
 
 #include "http/HttpResponse.hpp"
 #include "http/HttpRequest.hpp"
+#include "Config.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -16,6 +17,11 @@
 
 class HttpRequestHandler
 {
+    Config config;
+
+    std::size_t maxRequestSize;
+    std::size_t maxResponseSize;
+
     using HttpHandlerFunction = std::function<std::unique_ptr<HttpResponse>(HttpRequest &)>;
     std::map<std::string, HttpHandlerFunction> handlers;
 

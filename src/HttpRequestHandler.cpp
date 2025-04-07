@@ -20,6 +20,12 @@ std::unique_ptr<HttpResponse> HttpRequestHandler::GET(HttpRequest &request)
     if (!request.resourceExists() || !std::filesystem::exists(requestPath) || !std::filesystem::is_regular_file(requestPath))
         return std::make_unique<HttpResponse>(404, "NOT FOUND", "File Not Found");
 
+    std::filesystem::path path(requestPath);
+    std::uintmax_t fileSize = std::filesystem::file_size(path);
+
+    if (fileSize > maxResponseSize)
+        return std::make_unique<HttpResponse>(500, "FILE TOO LARGE", "Requested resouce is larger than the server defined limit.");
+
     std::ifstream fl(requestPath, std::ifstream::binary);
     char data[8192];
 
@@ -44,7 +50,8 @@ void HttpRequestHandler::initWorkingDirectory()
     workingDirectory = buff;
 }
 
-HttpRequestHandler::HttpRequestHandler()
+HttpRequestHandler::HttpRequestHandler() : config(Config::getConfigs()), maxRequestSize(config.getMaxRequestSize()),
+                                           maxResponseSize(config.getMaxResponseSize())
 {
     initWorkingDirectory();
 
