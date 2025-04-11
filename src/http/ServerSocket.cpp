@@ -1,5 +1,7 @@
 #include "http/ServerSocket.hpp"
 
+#include <spdlog/sinks/stdout_color_sinks.h>
+
 #include <stdexcept>
 #include <cstring>
 
@@ -11,7 +13,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-ServerSocket::ServerSocket(int port)
+#include <iostream>
+
+ServerSocket::ServerSocket(int port) : logger(spdlog::stdout_color_st("Server Socket"))
 {
     socket_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (socket_fd == -1)
@@ -35,12 +39,18 @@ ServerSocket::~ServerSocket()
     close(socket_fd);
 }
 
-// TODO: Handle accept returning -1 (don't throw an exception!)
 InternetHttpSocket ServerSocket::getConnection()
 {
     struct sockaddr_in peeraddr;
     socklen_t peerlen = sizeof(struct sockaddr_in);
-    int connection_fd = accept(socket_fd, (sockaddr *)&peeraddr, &peerlen);
-    InternetHttpSocket ret = InternetHttpSocket(peeraddr, connection_fd);
-    return ret;
+    int connection_fd;
+
+    do
+    {
+        connection_fd = accept(socket_fd, (sockaddr *)&peeraddr, &peerlen);
+        if (connection_fd == -1)
+            logger->debug("Failed to connect, accept returned -1. ERRNO: " + std::to_string(errno));
+    } while (connection_fd == -1);
+
+    return InternetHttpSocket(peeraddr, connection_fd);
 }

@@ -21,7 +21,7 @@ class WebServer
 public:
     WebServer() : config(Config::getConfigs()), serverSocket(config.getPort()),
                   loadBalancer(config.getMaxThreadPoolSize()),
-                  logger(spdlog::stdout_color_st("Server Socket"))
+                  logger(spdlog::stdout_color_st("Web Server"))
     {
         spdlog::set_pattern(config.getLoggingFormat());
         logger->info(std::string("Server initiated on port ") + std::to_string(config.getPort()));
@@ -34,7 +34,7 @@ public:
         while (true)
         {
             InternetHttpSocket clientSocket = serverSocket.getConnection();
-            logger->debug("New connection request from " + clientSocket.getIp());
+            logger->debug("New connection created with " + clientSocket.getIp());
             loadBalancer.enqueu_socket(clientSocket);
         }
     }
