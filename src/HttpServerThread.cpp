@@ -59,7 +59,18 @@ public:
                     break;
 
                 std::unique_ptr<HttpResponse> response = requestHandler.createResponse(request);
-                activeSocket.snd(response.get());
+
+                if (response->isChunked())
+                {
+                    ResponseBodyChunker chunker = response->getChunker();
+                    activeSocket.snd(response.get(), chunker);
+                    logger->debug("Chunked response successfully sent!");
+                }
+                else
+                {
+                    activeSocket.snd(response.get());
+                }
+
                 logger->info("\"" + request.getMethod() + " " + request.getOriginalPath() + "\" " + std::to_string(response->getResponseCode()) + " -> " + activeSocket.getIp());
             }
 

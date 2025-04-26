@@ -4,6 +4,7 @@
 #include <netinet/in.h>
 #include "HttpRequest.hpp"
 #include "HttpResponse.hpp"
+#include "ResponseBodyChunker.hpp"
 
 class InternetHttpSocket
 {
@@ -28,6 +29,8 @@ public:
     HttpRequest receive();
 
     size_t snd(HttpResponse *response);
+
+    size_t snd(HttpResponse *response, ResponseBodyChunker chunker);
 
     bool isActive();
 };

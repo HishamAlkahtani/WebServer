@@ -1,6 +1,7 @@
 #include "HttpRequestHandler.hpp"
 #include "http/HttpRequest.hpp"
 #include "http/HttpResponse.hpp"
+#include "http/ResponseBodyChunker.hpp"
 
 #include <filesystem>
 #include <fstream>
@@ -26,11 +27,18 @@ std::unique_ptr<HttpResponse> HttpRequestHandler::GET(HttpRequest &request)
     if (fileSize > maxResponseSize)
         return std::make_unique<HttpResponse>(500, "FILE TOO LARGE", "Requested resouce is larger than the server defined limit.");
 
-    std::ifstream fl(requestPath, std::ifstream::binary);
-    char data[8192];
+    if (fileSize > CHUNKED_TRANSFER_THRESHOLD)
+        return std::make_unique<HttpResponse>(200, "OK", ChunkedTransfer{}, requestPath);
 
-    fl.read(data, 8192);
+    std::ifstream fl(requestPath, std::ifstream::binary);
+
+    char *data = new char[fileSize + 1]();
+
+    fl.read(data, fileSize + 1);
     std::string dstring(data, fl.gcount());
+
+    delete[] data;
+
     return std::make_unique<HttpResponse>(200, "OK", dstring);
 }
 

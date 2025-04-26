@@ -1,4 +1,5 @@
 #include "http/InternetHttpSocket.hpp"
+#include "http/ResponseBodyChunker.hpp"
 #include "Config.hpp"
 
 #include <arpa/inet.h>
@@ -93,7 +94,27 @@ size_t InternetHttpSocket::snd(HttpResponse *response)
         return -1;
 
     std::string message = response->getData();
-    return send(connection_fd, message.c_str(), message.length() * sizeof(char), 0); // is this causing the segfaults?
+    return send(connection_fd, message.c_str(), message.size() * sizeof(char), 0); // is this causing the segfaults?
+}
+
+size_t InternetHttpSocket::snd(HttpResponse *response, ResponseBodyChunker chunker)
+{
+    if (!active)
+        return -1;
+
+    size_t sentBytes = 0;
+    std::string responseHeaders = response->getData();
+
+    sentBytes += send(connection_fd, responseHeaders.c_str(), responseHeaders.size() * sizeof(char), 0);
+
+    while (chunker.hasChunk())
+    {
+        std::string chunk = chunker.getChunk();
+
+        sentBytes += send(connection_fd, chunk.c_str(), chunk.size() * sizeof(char), 0);
+    }
+
+    return sentBytes;
 }
 
 bool InternetHttpSocket::isActive()
